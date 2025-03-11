@@ -36,7 +36,7 @@ pxnum = 32 # Total number of pixels for the aperture (before padding)
 pxsize = aperture_size / pxnum # Pixel size, in m
 
 #%% Define number of speckles to create
-specklenum = 2**4
+specklenum = 2**8
 
 #%% Generate thin scattering media to create speckles. 
 # You can tweak [corr_width] and  [scatter_strength] to play with how the speckles look
@@ -69,14 +69,17 @@ for idx in range(specklenum):
 # Convert to numpy array (and reorder axes)
 speckles = np.array(speckles)
 speckles = np.moveaxis(speckles, 0, 2)
+# Convert speckles to uint8 (to reduce storage needs)
+speckles = speckles / np.max(speckles)
+speckles *= 255
+speckles = speckles.astype(np.uint8)
 
 # #Show video of speckles (comment/uncomment if you want to take a look at the speckles)
 # ops.show_vid(speckles, rate = 200)
 
-
 #%% Store speckles into h5 file
 # filename = 'speckles_64px_65536img'
 
-# with h5py.File(filename + '.h5','w') as f:
+# with h5py.File(filename + '.h5', 'w') as f:
 #     # Save experimental data
 #     f.create_dataset('speckles', data = speckles)

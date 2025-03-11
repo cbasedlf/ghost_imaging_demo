@@ -6,7 +6,9 @@ Ghost imaging demo using predefined speckle patterns
 
 #%% Import libraries
 import numpy as np
-import optsim as ops
+import matplotlib
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
 # Loading generated speckles 
 import h5py
@@ -14,11 +16,6 @@ import h5py
 # Libraries for image manipulation (load objects, resize them to speckle size, make animations)
 from skimage.transform import resize
 from PIL import Image
-
-import matplotlib
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 #%% Load speckle patterns. You need to generate a file with speckle_generation.py first
 
@@ -42,7 +39,7 @@ obj = resize(obj, (speckles.shape[0],speckles.shape[0]))
 
 #%% Simulate measurements
 
-meas_num = 8192 # Choose number of measurements
+meas_num = 65536 # Choose number of measurements
 
 # Reshape object into column vector
 obj_vec = np.reshape(obj, (speckles.shape[0] * speckles.shape[1], 1))
@@ -64,11 +61,13 @@ obj_ghost /= meas_num # Normalize final recovery
 obj_ghost_all = np.moveaxis(np.array(intermediate_ghost),0,2)
 
 #%% Create animation showing the recovery
-rate = 0.1
+rate = 1/24 # Resfresh rate of the figure
 
-fig_size = (8,8)
+# Figure properties
+fig_size = (12,6)
 fontsize = 10
 
+# Create figure
 fig = plt.figure(layout = 'constrained', figsize = fig_size)
 fig.suptitle('Ghost imaging recovery', fontsize='xx-large')
 subfigs = fig.subfigures(nrows = 2, ncols = 1, wspace = 0.07)
@@ -86,9 +85,11 @@ ax_rec.set_title(r'Recovery: $\sum_{i=0}^{1}{[y_{i} - <y>] \times Speckle_i}$', 
 ax_int = subfigs[1].subplots(nrows = 1, ncols = 1)
 lineplot = ax_int.plot(np.arange(0, 1, step = 1), y[0:1])[0]
 ax_int.set_xlim([0, meas_num])
+ax_int.set_ylim([np.min(y), np.max(y)])
 ax_int.set_xlabel('Speckle #')
 ax_int.set_ylabel('Intensity (a.u.)')
 
+# Function to refresh each frame of the animation
 def update_plots(idx):
     im2.set_data(speckles[:, :, idx])
     ax_spck.set_title(f'Speckle$_{{{idx}}}$', fontsize = fontsize)
@@ -100,10 +101,9 @@ def update_plots(idx):
     
     lineplot.set_xdata(np.arange(0, idx, step = 1))
     lineplot.set_ydata(y[0:idx])
-    
-    plt.draw()
-    plt.show()
-    
 
-anim = animation.FuncAnimation(fig, update_plots, frames = meas_num,
-                               interval = rate, repeat = False)
+# Create animation    
+# anim = animation.FuncAnimation(fig, update_plots, frames = meas_num,
+#                                interval = rate, repeat = False)
+# Save to file
+# anim.save('ghost_recovery.mp4', writer = 'ffmpeg', fps =  24, bitrate = 24000, dpi = 300)
