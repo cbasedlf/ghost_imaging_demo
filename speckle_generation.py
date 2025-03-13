@@ -20,7 +20,6 @@ FFT implementation, and some visualization. I included that in the package so th
 to download/install it.
 The rest are common python libraries (NumPy, h5Py)
 
-
 @author: F. Soldevila
 """
 #%% Import libraries
@@ -36,7 +35,7 @@ pxnum = 32 # Total number of pixels for the aperture (before padding)
 pxsize = aperture_size / pxnum # Pixel size, in m
 
 #%% Define number of speckles to create
-specklenum = 2**8
+specklenum = 2**0
 
 #%% Generate thin scattering media to create speckles. 
 # You can tweak [corr_width] and  [scatter_strength] to play with how the speckles look
@@ -60,7 +59,10 @@ for idx in range(specklenum):
     scat[idx].thin_scat *= mask
 
 #%% Propagate a field through the scattering medium to generate speckles.
-padsize = 16 # Padding size for the FFT process. End image size will be [2 * padsize + pxsize]
+# Padding size for the FFT process. End image size will be [2 * padsize + pxsize]. It is important that 
+# the final image size is a power of 2 if you want to run compressive_demo.py, as Hadamard matrices
+# cannot be done with aribtrary sizes and I did not want to code a solution with zero-padding
+padsize = 16
 #Far field propagation (Fourier transform):
 speckles = [] # Initialization
 for idx in range(specklenum):
@@ -75,7 +77,7 @@ speckles *= 255
 speckles = speckles.astype(np.uint8)
 
 # #Show video of speckles (comment/uncomment if you want to take a look at the speckles)
-# ops.show_vid(speckles, rate = 200)
+anim = ops.show_vid(speckles, rate = 200)
 
 #%% Store speckles into h5 file
 # filename = 'speckles_64px_65536img'

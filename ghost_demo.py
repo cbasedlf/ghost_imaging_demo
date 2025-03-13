@@ -1,5 +1,15 @@
 """
-Ghost imaging demo using predefined speckle patterns
+Code to simulate a Ghost Imaging experiment using predefined speckle patterns
+
+The code loads a .h5 file with the stored speckles (those can be created with 
+speckle_generation.py). You can choose the number of speckles to use (for example, even if 
+you load a file with N patterns, you can try to recover with M < N patterns and see the result).
+The code perfoms the projections  of the speckles onto a simulated object and recovers the 
+image using the correlations between the speckles and the total energy of the projections (which
+simulates the signal that a bucket detector would record in a real experiment)
+The last part of the code creates an animation showing the result of the recovery when using an
+increasing number of speckles (until the number set by the user). You can comment it if you only
+care about the final result
 
 @author: F. Soldevila
 """
@@ -56,6 +66,10 @@ for idx in range(meas_num):
     obj_ghost += (y[idx] - np.mean(y)) * speckles[:, :, idx]
     intermediate_ghost.append(np.copy(obj_ghost)) # Store current recovery
 obj_ghost /= meas_num # Normalize final recovery
+
+fig, ax = plt.subplots( nrows = 1, ncols = 1, figsize = (5,5))
+ax.imshow(obj_ghost)
+plt.title('Ghost imaging recovery with ' + str(meas_num) + ' speckle patterns')
 # Reshape into numpy array
 obj_ghost_all = np.moveaxis(np.array(intermediate_ghost),0,2)
 
