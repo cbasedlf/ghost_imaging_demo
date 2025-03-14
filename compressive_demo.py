@@ -1,9 +1,9 @@
 """
 Code to recover an image from a Ghost Imaging experiment without using the conventional 
 approach (correlations / linear combination of speckles).
-Two options are shown: using the pseudoinverse method (i.e., minimizing the l2 norm) and
-a Compressive Sensing approach, with a regularization term that minimizes the l1 norm (i.e.
-using sparsity assumptions)
+Three options are shown: using the pseudoinverse method (i.e., minimizing the l2 norm), a
+Compressive Sensing approach with a regularization term that minimizes the l1 norm (i.e.
+using sparsity assumptions), and a denoising method that minimizes the TV-norm.
 
 @author: F. Soldevila
 """
@@ -44,7 +44,7 @@ obj = resize(obj, (speckles.shape[0],speckles.shape[0]))
 
 #%% Simulate measurements
 
-meas_num = 1024 # Choose number of measurements
+meas_num = 256 # Choose number of measurements
 
 # Reshape object into column vector
 obj_vec = np.reshape(obj, (speckles.shape[0] * speckles.shape[1], 1))
@@ -90,7 +90,7 @@ def callback(x, pf, pg, eps, cost):
 # Define algorithm parameters
 L = np.abs((Aop.H * Aop).eigs(1)[0])
 tau = 0.95 / L
-eps = 3e6 # This controls how much relevance you give to l1-minimization
+eps = 6e6 # This controls how much relevance you give to l1-minimization
 maxit = 500 # Maximum number of iterations for the algo
 
 # FISTA solver
@@ -109,7 +109,7 @@ niterf = len(costf)
 obj_fista_had = np.reshape(Hop.dot(x_fista), 
                               (speckles.shape[0], speckles.shape[1]))
 
-#%% Solve using a denoising approach (l2-norm, TV-norm). 
+#%% Solve using a denoising approach (l2-norm, TV-norm). Follows the example from:
 # https://pyproximal.readthedocs.io/en/stable/tutorials/denoising.html#sphx-glr-tutorials-denoising-py
 
 # Build Gradient operator
@@ -117,22 +117,22 @@ sampling = 1.
 Gop = pylops.Gradient(dims = (speckles.shape[0], speckles.shape[1]),
                       sampling = sampling, edge = False,
                       kind = 'forward', dtype = 'float64')
-L = 8. / sampling ** 2 # maxeig(Gop^H Gop)
+Ltv = 8. / sampling ** 2 # maxeig(Gop^H Gop)
 
 # Define terms of the objective function
 # L2 data term
-l2 = pyproximal.L2(b = obj_ghost.ravel())
+l2tv = pyproximal.L2(b = obj_ghost.ravel())
 # Isotropic TV  term
-sigma = 5e2 #Hyperparameter for TV-term. Determines strength of TV regularization
+sigma = 6e2 #Hyperparameter for TV-term. Determines strength of TV regularization
 l1iso = pyproximal.L21(ndim = 2, sigma = sigma) # Define l21-norm term (for isotropic TV)
 
 # Define algorithm parameters
-tau = 1 / np.sqrt(L)
-mu = 1. / (tau*L)
+tautv = 1 / np.sqrt(Ltv)
+mutv = 1. / (tautv*Ltv)
 
 # Primal-dual solver
-x_tv = pyproximal.optimization.primaldual.PrimalDual(l2, l1iso, Gop,
-                                    tau = tau, mu = mu, theta = 1.,
+x_tv = pyproximal.optimization.primaldual.PrimalDual(l2tv, l1iso, Gop,
+                                    tau = tautv, mu = mutv, theta = 1.,
                                     x0 = np.zeros_like(obj_ghost.ravel()),
                                     niter = 100)
 # Reshape solution into 2D array, for visualization
