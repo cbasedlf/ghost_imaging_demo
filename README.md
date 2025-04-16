@@ -1,3 +1,5 @@
+![image](https://github.com/user-attachments/assets/6610192a-3551-42ca-bcd8-8149ee3b28ac)
+
 # ghost_imaging_demo
  Few code snippets with the tools needed for doing Ghost Imaging simulations: speckle generation, simulation of measurements, recovery, etc.
 
