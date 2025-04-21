@@ -10,6 +10,6 @@
  
  compressive_demo.py: Ghost Imaging using different recovery strategies (least squares, l1-minimization, TV-minimization).
 
- optsim.py: library for optical simulations that I built some time ago (you can find it on Github too). I think I only used a couple simple functions for these simulations (FFTs, etc.)
+ optsim.py: library for optical simulations that I built some time ago (you can find it on Github too). I think I only used a couple simple functions for these simulations (FFTs, generation of speckles, etc.)
 
 You can find a longer explanation at: https://fsolt.es/2025/04/easy-ghost-imaging-simulations-and-some-codes-to-do-it-at-home/
