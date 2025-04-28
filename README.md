@@ -5,7 +5,7 @@
 
  Files explanation:
  
-**speckle_generation.py**: code to generate speckle patterns. You can change a few parameters to tune how the speckles look. This creates a .h5 file with the speckles, that will be used in the other codes to simulate the measurements and do the recovery.
+**speckle_generation.py**: code to generate speckle patterns. You can change a few parameters to tune how the speckles look. This creates a .h5 file with the speckles, that will be used in the other codes to simulate the measurements and do the recovery. The other codes need the .h5 file with the speckles to work, so you have to run this first.
  
 **ghost_demo.py**: classical ghost imaging recovery (without compressive sensing). You can choose the number of speckles to use.
  
